@@ -9,7 +9,7 @@ const App = () => {
     setIsLoading(true);
     try {
       var url = new URL("http://127.0.0.1:3001/getRandomFood"),
-      params = {latitude:35.696233, longitude:139.570431}
+      params = {latitude:55.696233, longitude:37.570431}
       Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
       const response = await fetch(url, {
         method: 'GET',
