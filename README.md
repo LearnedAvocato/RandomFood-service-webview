@@ -1,2 +1,2 @@
-# service-webview
-Сервис веб-фронтенда
+# react-slick-variable-width-center-mode
+Created with CodeSandbox
