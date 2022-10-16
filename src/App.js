@@ -102,6 +102,11 @@ export default function App() {
           if (foodTitle != null) {
             foodTitle.innerText = card["name"];
           }
+
+          var foodDescription = document.getElementById("description" + i.toString());
+          if (foodTitle != null) {
+            foodDescription.innerText = card["description"];
+          }
         } 
   
         //setData(result);
@@ -112,15 +117,34 @@ export default function App() {
     //onInit: onInit()
   }
 
+  // const renderSlides = () =>
+  //   [0, 1, 2, 3, 4].map(num => (
+  //     <div>
+  //       <figure>
+  //       <img id={"food"+num.toString()} src="src/avocat.svg" />
+  //       <figcaption id={"title"+num.toString()} ></figcaption>
+  //     </figure>  
+  //     </div>
+  //   ));
+
+  //     <div class="card">
+  //   <img src="img_avatar.png" alt="Avatar" style="width:100%">
+  //   <div class="container">
+  //     <h4><b>HTML CSS</b></h4>
+  //     <p>Architect & Engineer</p>
+  //   </div>
+  // </div>
+
   const renderSlides = () =>
-    [0, 1, 2, 3, 4].map(num => (
-      <div>
-        <figure>
-        <img id={"food"+num.toString()} src="src/avocat.svg" />
-        <figcaption id={"title"+num.toString()} ></figcaption>
-      </figure>  
-      </div>
-    ));
+  [0, 1, 2, 3, 4].map(num => (
+  <div class="card">
+    <img id={"food"+num.toString()}  src="src/avocat.svg" />
+    <div class="container">
+      <h4 id={"title"+num.toString()}></h4>
+      <p id={"description"+num.toString()}></p>
+    </div>
+  </div>
+  ));
 
   return (
     <div id="foodCarousel">
