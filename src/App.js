@@ -7,60 +7,33 @@ import "slick-carousel/slick/slick-theme.css";
 
 export default function App() {
 
-  //onInit = () => {
-  //  console.log('test')
-  //}
-
-  /*
-  const onInit = async () => {
-    try {
-      var url = new URL("http://127.0.0.1:3001/getRandomFood"),
-      params = {latitude:55.696233, longitude:37.570431}
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      console.log('result is: ', JSON.stringify(result, null, 4));
-
-      //setData(result);
-    } catch (err) {
-      console.log('err: ', err)
-    }
-  };
-  */
-
+  const cardsNum = 30;
+  var initialized = false;
 
   const settings = {
-    infinite: false,
+    infinite: true,
     speed: 500,
     slidesToScroll: 1,
     variableWidth: true,
     adaptiveHeight: true,
     centerMode: true,
-    //responsive: [
-    //  {
-    //    breakpoint: 600,
-    //    settings: {
-    //      variableWidth: false,
-    //      centerMode: false
-    //    }
-    //  }
-    //],
+    className: "center",
+    centerPadding: "60px",
+    slidesToShow: 5,
+    adaptiveHeight: true,
+    //initialSlide: 3,
+    onReInit: () => {
+      console.log("reInit");
+      initialized = true;
+    },
     onInit: async () => {
+      console.log("init");
+      //if (!initialized)
+      //  return;
+
       try {
         var url = new URL("http://127.0.0.1:3001/getRandomFood"),
-        params = {latitude:55.696233, longitude:37.570431}
+        params = {latitude:55.696233, longitude:37.570431, cardsNum:cardsNum, getTags:true}
         Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
         const response = await fetch(url, {
           method: 'GET',
@@ -97,7 +70,7 @@ export default function App() {
             console.log("imageUrl: ", imageUrl);
             foodImg.src = imageUrl;  
           }
-
+        /*
           var foodTitle = document.getElementById("title" + i.toString());
           if (foodTitle != null) {
             foodTitle.innerText = card["name"];
@@ -107,42 +80,18 @@ export default function App() {
           if (foodTitle != null) {
             foodDescription.innerText = card["description"];
           }
+          */
         } 
-  
-        //setData(result);
       } catch (err) {
         console.log('err: ', err)
       }
     }
-    //onInit: onInit()
   }
 
-  // const renderSlides = () =>
-  //   [0, 1, 2, 3, 4].map(num => (
-  //     <div>
-  //       <figure>
-  //       <img id={"food"+num.toString()} src="src/avocat.svg" />
-  //       <figcaption id={"title"+num.toString()} ></figcaption>
-  //     </figure>  
-  //     </div>
-  //   ));
-
-  //     <div class="card">
-  //   <img src="img_avatar.png" alt="Avatar" style="width:100%">
-  //   <div class="container">
-  //     <h4><b>HTML CSS</b></h4>
-  //     <p>Architect & Engineer</p>
-  //   </div>
-  // </div>
-
   const renderSlides = () =>
-  [0, 1, 2, 3, 4].map(num => (
+  [...Array(cardsNum).keys()].map(num => (
   <div class="card">
     <img id={"food"+num.toString()}  src="src/avocat.svg" />
-    <div class="container">
-      <h4 id={"title"+num.toString()}></h4>
-      <p id={"description"+num.toString()}></p>
-    </div>
   </div>
   ));
 
@@ -151,45 +100,4 @@ export default function App() {
     <Slider {...settings}>{renderSlides()}</Slider>
   </div>
   );
-      /*
-      <div>
-      <img id="food2" src="http://placekitten.com/g/200/200" />
-      </div>
-      <div>
-      <img id="food3" src="http://placekitten.com/g/200/200" />
-      </div>
-      <div>
-      <img id="food4" src="http://placekitten.com/g/200/200" />
-      </div>
-      <div>
-      <img id="food5" src="http://placekitten.com/g/200/200" />
-      </div>
-      */
-/*  
-  return (
-    <div className="container" id="foodCarousel">
-      <h2> Single Item</h2>
-      <Slider {...settings}>
-        <div style={{ width: 600 }}>
-          <div style={{ height: 400, background: "red" }}>1</div>
-        </div>
-        <div style={{ width: 600 }}>
-          <div style={{ height: 400, background: "blue" }}>2</div>
-        </div>
-        <div style={{ width: 600 }}>
-          <div style={{ height: 400, background: "yellow" }}>3</div>
-        </div>
-        <div style={{ width: 600 }}>
-          <div style={{ height: 400, background: "green" }}>4</div>
-        </div>
-        <div style={{ width: 600 }}>
-          <div style={{ height: 400, background: "brown" }}>5</div>
-        </div>
-        <div style={{ width: 600 }}>
-          <div style={{ height: 400, background: "pink" }}>6</div>
-        </div>
-      </Slider>
-    </div>
-  );
-  */
 }
