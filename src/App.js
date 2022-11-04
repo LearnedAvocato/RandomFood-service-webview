@@ -4,6 +4,9 @@ import "./styles.css";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import yandexFoodIcon from './res/yandex_food.ico'
 
 export default function App() {
 
@@ -54,25 +57,36 @@ export default function App() {
         var foodCards = result["foodCards"];
         for (var i = 0; i < foodCards.length; i++){
           var card = foodCards[i];
-          var name = "food" + i.toString();
-          var foodImgWithDuplicates = document.getElementsByName(name);
-          for (var j = 0; j < foodImgWithDuplicates.length; j++) {
-            var foodImg = foodImgWithDuplicates[j];
-
-            if (foodImg == null) {
-              continue;
+          var foodImageWithDuplicates = document.getElementsByName("image" + i.toString());
+          var foodTitleWithDuplicates = document.getElementsByName("title" + i.toString());
+          var foodDescriptionWithDuplicates = document.getElementsByName("description" + i.toString());
+          var foodUrlWithDuplicates = document.getElementsByName("url" + i.toString());
+          for (var j = 0; j < foodImageWithDuplicates.length; j++) {
+            var foodImg = foodImageWithDuplicates[j];
+            if (foodImg != null) {            
+              var imageUrl = card["imageUrl"];
+              if (!imageUrl.includes("{w}")) {
+                continue;
+              } else {
+                imageUrl = imageUrl.replace("{w}", "200");
+                imageUrl = imageUrl.replace("{h}", "200");
+                //console.log("imageUrl: ", imageUrl);
+                foodImg.src = imageUrl;  
+              }
             }
-
-            var imageUrl = card["imageUrl"];
-            if (!imageUrl.includes("{w}")) {
-              continue;
-            } else {
-              imageUrl = imageUrl.replace("{w}", "200");
-              imageUrl = imageUrl.replace("{h}", "200");
-              console.log("imageUrl: ", imageUrl);
-              foodImg.src = imageUrl;  
+            var foodTitle = foodTitleWithDuplicates[j];
+            if (foodTitle != null) {
+              foodTitle.innerText = card["name"];
             }
-          } 
+            var foodDescription = foodDescriptionWithDuplicates[j];
+            if (foodDescription != null) {
+              foodDescription.innerText = card["description"];
+            }
+            var foodUrl = foodUrlWithDuplicates[j];
+            if (foodUrl != null) {
+              foodUrl.href = card["restarauntUrl"];
+            }
+          }
         }
       } catch (err) {
         console.log('err: ', err)
@@ -82,9 +96,20 @@ export default function App() {
 
   const renderSlides = () =>
   [...Array(cardsNum).keys()].map(num => (
-  <div class="card">
-    <img name={"food"+num.toString()}  src="src/avocat.svg" />
-  </div>
+    <Card style={{ width: '400px', height: '400px' }}>
+      <Card.Img name={"image"+num.toString()} variant="top" src="" />
+      <Card.Body>
+        <Card.Title name={"title"+num.toString()}></Card.Title>
+        <Card.Text name={"description"+num.toString()}>
+        </Card.Text>
+        <a name={"url"+num.toString()} href="" target="_blank">
+          <Button variant="primary">
+            <img src={yandexFoodIcon} style={{display: "inline-block"}} />
+            <div style={{display: "inline-block", color: "#000000"}}>В ресторан!</div>
+          </Button>
+        </a>
+      </Card.Body>
+    </Card>
   ));
 
   return (

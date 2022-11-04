@@ -1,7 +1,6 @@
 .App {
   font-family: sans-serif;
   text-align: center;
-  background-color: rgb(182, 238, 118);
 }
 
 .slick-slider {
@@ -11,7 +10,7 @@
 
 .slick-list {
   margin: 0 -10px;
-  height: 300px !important; 
+  height: 800px !important; 
 }
 
 .slick-slide {
@@ -24,19 +23,11 @@
   margin-right: auto;
 }
 
-.card {
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  width: 40%;
-  word-wrap: break-word;
-  word-break: break-all; 
-  margin: 20px;
-}
-
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-
 .container {
   padding: 2px 16px;
 }
+
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+  background-color: #fce000 !important;
+}
+
