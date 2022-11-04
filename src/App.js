@@ -7,7 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 
 export default function App() {
 
-  const cardsNum = 30;
+  const cardsNum = 10;
   var initialized = false;
 
   const settings = {
@@ -54,34 +54,26 @@ export default function App() {
         var foodCards = result["foodCards"];
         for (var i = 0; i < foodCards.length; i++){
           var card = foodCards[i];
-          var id = "food" + i.toString();
-          var foodImg = document.getElementById(id);
+          var name = "food" + i.toString();
+          var foodImgWithDuplicates = document.getElementsByName(name);
+          for (var j = 0; j < foodImgWithDuplicates.length; j++) {
+            var foodImg = foodImgWithDuplicates[j];
 
-          if (foodImg == null) {
-            continue;
-          }
+            if (foodImg == null) {
+              continue;
+            }
 
-          var imageUrl = card["imageUrl"];
-          if (!imageUrl.includes("{w}")) {
-            continue;
-          } else {
-            imageUrl = imageUrl.replace("{w}", "200");
-            imageUrl = imageUrl.replace("{h}", "200");
-            console.log("imageUrl: ", imageUrl);
-            foodImg.src = imageUrl;  
-          }
-        /*
-          var foodTitle = document.getElementById("title" + i.toString());
-          if (foodTitle != null) {
-            foodTitle.innerText = card["name"];
-          }
-
-          var foodDescription = document.getElementById("description" + i.toString());
-          if (foodTitle != null) {
-            foodDescription.innerText = card["description"];
-          }
-          */
-        } 
+            var imageUrl = card["imageUrl"];
+            if (!imageUrl.includes("{w}")) {
+              continue;
+            } else {
+              imageUrl = imageUrl.replace("{w}", "200");
+              imageUrl = imageUrl.replace("{h}", "200");
+              console.log("imageUrl: ", imageUrl);
+              foodImg.src = imageUrl;  
+            }
+          } 
+        }
       } catch (err) {
         console.log('err: ', err)
       }
@@ -91,7 +83,7 @@ export default function App() {
   const renderSlides = () =>
   [...Array(cardsNum).keys()].map(num => (
   <div class="card">
-    <img id={"food"+num.toString()}  src="src/avocat.svg" />
+    <img name={"food"+num.toString()}  src="src/avocat.svg" />
   </div>
   ));
 
