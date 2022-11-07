@@ -24,6 +24,7 @@ function CardIndicesToSet(last, num) {
 
 async function RequestCards(cardsNum) {
   try {
+    // var url = new URL("https://learned-avocato.ru/getRandomFood"),
     var url = new URL("http://127.0.0.1:3001/getRandomFood"),
     params = {latitude:55.696233, longitude:37.570431, cardsNum:cardsNum, getTags:true}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
