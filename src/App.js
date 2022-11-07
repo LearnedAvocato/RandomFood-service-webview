@@ -1,4 +1,4 @@
-import React, { Component }  from 'react';
+import React, { Component,  useState, useRef  }  from 'react';
 
 import "./styles.css";
 import Slider from "react-slick";
@@ -6,6 +6,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import Collapse from 'react-bootstrap/Collapse';
 import yandexFoodIcon from './res/yandex_food.ico'
 
 export default function App() {
@@ -60,6 +61,7 @@ export default function App() {
           var foodImageWithDuplicates = document.getElementsByName("image" + i.toString());
           var foodTitleWithDuplicates = document.getElementsByName("title" + i.toString());
           var foodDescriptionWithDuplicates = document.getElementsByName("description" + i.toString());
+          var foodDescriptionMoreWithDuplicates = document.getElementsByName("descriptionmore" + i.toString());
           var foodUrlWithDuplicates = document.getElementsByName("url" + i.toString());
           for (var j = 0; j < foodImageWithDuplicates.length; j++) {
             var foodImg = foodImageWithDuplicates[j];
@@ -79,8 +81,10 @@ export default function App() {
               foodTitle.innerText = card["name"];
             }
             var foodDescription = foodDescriptionWithDuplicates[j];
+            var foodDescriptionMore = foodDescriptionMoreWithDuplicates[j];
             if (foodDescription != null) {
-              foodDescription.innerText = card["description"];
+              foodDescription.innerText = card["description"].substring(0, 100);
+              foodDescriptionMore.innerText = card["description"].substring(100);
             }
             var foodUrl = foodUrlWithDuplicates[j];
             if (foodUrl != null) {
@@ -94,14 +98,90 @@ export default function App() {
     }
   }
 
+  function toggleText(n) {
+    
+      // Get all the elements from the page
+      console.log("points"+n.toString());
+      var points = 
+          document.getElementById("points"+n.toString());
+
+    console.log(points)
+
+      var showMoreText =
+          document.getElementById("moreText"+n.toString());
+
+      var buttonText =
+          document.getElementById("textButton"+n.toString());
+
+      // If the display property of the dots 
+      // to be displayed is already set to 
+      // 'none' (that is hidden) then this 
+      // section of code triggers
+      if (points.style.display === "none") {
+
+          // Hide the text between the span
+          // elements
+          showMoreText.style.display = "none";
+
+          // Show the dots after the text
+          points.style.display = "inline";
+
+          // Change the text on button to 
+          // 'Show More'
+          buttonText.innerHTML = "Show More";
+      }
+
+      // If the hidden portion is revealed,
+      // we will change it back to be hidden
+      else {
+
+          // Show the text between the
+          // span elements
+          showMoreText.style.display = "inline";
+
+          // Hide the dots after the text
+          points.style.display = "none";
+
+          // Change the text on button
+          // to 'Show Less'
+          buttonText.innerHTML = "Show Less";
+      }
+  }
+  const [open, setOpen] = useState(false);
+
   const renderSlides = () =>
   [...Array(cardsNum).keys()].map(num => (
     <Card style={{ width: '400px', height: '400px' }}>
       <Card.Img name={"image"+num.toString()} variant="top" src="" />
       <Card.Body>
         <Card.Title name={"title"+num.toString()}></Card.Title>
-        <Card.Text name={"description"+num.toString()}>
-        </Card.Text>
+        {/* <>
+        <Button 
+          onClick={() => setOpen(!open)}
+          aria-controls="example-collapse-text"
+          aria-expanded={open}
+        >
+          Показать описание
+        </Button>
+        <Collapse in={open}>
+          <div id="example-collapse-text">
+          <Card.Text name={"description"+num.toString()}>
+          </Card.Text>
+          </div>
+        </Collapse>
+      </> */}
+      <div name={"description"+num.toString()}>
+      </div>
+        <span id={"points"+num.toString()} style={{display: "inline-block"}}>...</span>
+  
+        <span id={"moreText"+num.toString()} style={{display: "none"}}> 
+        <div name={"descriptionmore"+num.toString()}>
+        </div>
+        </span>
+        <button onclick={toggleText(num)} id={"textButton"+num.toString()} style={{display: "inline-block"}}>
+        Show More
+        </button>
+        
         <a name={"url"+num.toString()} href="" target="_blank">
           <Button variant="primary">
             <img src={yandexFoodIcon} style={{display: "inline-block"}} />
