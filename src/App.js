@@ -121,8 +121,8 @@ export default function App() {
     <Card style={{ width: '400px', height: '400px' }}>
       <Card.Img name={"image"+num.toString()} variant="top" src="" />
       <Card.Body>
-        <Card.Title name={"title"+num.toString()} style={{height:"80px"}}></Card.Title>
-        <Card.Text name={"description"+num.toString()} style={{height:"100px", "overflow-y": "scroll"}}> 
+        <Card.Title name={"title"+num.toString()}></Card.Title>
+        <Card.Text name={"description"+num.toString()} > 
         </Card.Text> 
         <a name={"url"+num.toString()} href="" target="_blank">
           <Button variant="primary">

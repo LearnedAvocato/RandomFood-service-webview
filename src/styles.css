@@ -15,12 +15,14 @@
 
 .slick-slide {
   padding: 0 40px;
+  margin-top: 50px;
 }
 
 .slick-slide.slick-center {
   transform: scale(1.3);
   margin-left: auto;
   margin-right: auto;
+  margin-top: 100px;
 }
 
 .container {
@@ -31,7 +33,7 @@
   background-color: #BED1AA !important;
   width: 100%;
   border: none;
-  font-family: 'Raleway';
+  font-family: 'Nunito';
 }
 
 .card {
@@ -40,18 +42,21 @@
 }
 
 .card-title {
-  font-family: 'Raleway';
+  font-family: 'Nunito';
   font-style: normal;
   font-weight: bold;
   text-align: center;
   color: #7EA200;
+  height: 80px;
 }
 
 .card-text {
-  font-family: 'Raleway';
+  font-family: 'Nunito';
   font-style: normal;
   text-align: center;
   color: #777F00;
+  height: 100px;
+  overflow-y: scroll;
 }
 
 .card-img, .card-img-bottom, .card-img-top {
