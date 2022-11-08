@@ -1,0 +1,15 @@
+body {
+
+    background: radial-gradient(59.71% 59.71% at 23.57% 38.08%, #FFFBA2 0%, rgba(217, 217, 217, 0) 100%),
+                radial-gradient(70% 70% at 70% 70%, #FFE2B6 0%, rgba(242, 223, 193, 0.666667) 42.71%, rgba(217, 217, 217, 0) 100%);
+    
+  }
+
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+.header {
+    text-align: center;
+  }
