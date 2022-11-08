@@ -28,5 +28,38 @@
 }
 
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
-  background-color: #fce000 !important;
+  background-color: #BED1AA !important;
+  width: 100%;
+  border: none;
+  font-family: 'Raleway';
 }
+
+.card {
+  background: #F7FBEC;
+  border-radius: 14px;
+}
+
+.card-title {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: bold;
+  text-align: center;
+  color: #7EA200;
+}
+
+.card-text {
+  font-family: 'Raleway';
+  font-style: normal;
+  text-align: center;
+  color: #777F00;
+}
+
+.card-img, .card-img-bottom, .card-img-top {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+  border-radius: 16px;
+  margin-top: 5%;
+}
+

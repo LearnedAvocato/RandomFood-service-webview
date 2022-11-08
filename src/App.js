@@ -126,7 +126,6 @@ export default function App() {
         </Card.Text> 
         <a name={"url"+num.toString()} href="" target="_blank">
           <Button variant="primary">
-            <img src={yandexFoodIcon} style={{display: "inline-block"}} />
             <div style={{display: "inline-block", color: "#000000"}}>В ресторан!</div>
           </Button>
         </a>
