@@ -11,6 +11,7 @@ import yandexFoodIcon from './res/yandex_food.ico';
 const maxCardsNum = 30;
 const leftCardsNumToRequestNew = 15;
 const cardsNumToRequest = 10;
+const cardsNumToPreloadBeforeFirst = 5;
 var lastLoadedCardIdx = -1;
 var processingCardRequest = false;
 
@@ -22,7 +23,7 @@ function CardIndicesToSet(last, num) {
   }
 }
 
-async function RequestCards(cardsNum) {
+async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
   try {
     // var url = new URL("https://learned-avocato.ru/getRandomFood"),
     var url = new URL("http://127.0.0.1:3001/getRandomFood"),
@@ -53,6 +54,13 @@ async function RequestCards(cardsNum) {
       indicesToSet = CardIndicesToSet(lastLoadedCardIdx, foodCards.length);
     }
     lastLoadedCardIdx = (lastLoadedCardIdx + foodCards.length - 1) % maxCardsNum;
+
+    // update to preload before first
+    for (var i = 0; i < indicesToSet.length; i++){
+        indicesToSet[i] = (indicesToSet[i] - defaultIndicesOffset + maxCardsNum) % maxCardsNum;
+    }
+    lastLoadedCardIdx = (lastLoadedCardIdx - defaultIndicesOffset + maxCardsNum) % maxCardsNum;
+    
     for (var i = 0; i < foodCards.length; i++){
       var card = foodCards[i];
       var foodImageWithDuplicates = document.getElementsByName("image" + indicesToSet[i].toString());
@@ -103,7 +111,7 @@ export default function App() {
     centerPadding: "60px",
     slidesToShow: 5,
     adaptiveHeight: true,
-    onInit: () => RequestCards(maxCardsNum),
+    onInit: () => RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst),
     afterChange: index => {
       var indexWithOffset = lastLoadedCardIdx - index;
       if (indexWithOffset < 0) {
