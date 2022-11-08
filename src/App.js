@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import yandexFoodIcon from './res/yandex_food.ico'
+import yandexFoodIcon from './res/yandex_food.ico';
 
 const maxCardsNum = 30;
 const leftCardsNumToRequestNew = 15;
@@ -121,9 +121,9 @@ export default function App() {
     <Card style={{ width: '400px', height: '400px' }}>
       <Card.Img name={"image"+num.toString()} variant="top" src="" />
       <Card.Body>
-        <Card.Title name={"title"+num.toString()}></Card.Title>
-        <Card.Text name={"description"+num.toString()}>
-        </Card.Text>
+        <Card.Title name={"title"+num.toString()} style={{height:"80px"}}></Card.Title>
+        <Card.Text name={"description"+num.toString()} style={{height:"100px", "overflow-y": "scroll"}}> 
+        </Card.Text> 
         <a name={"url"+num.toString()} href="" target="_blank">
           <Button variant="primary">
             <img src={yandexFoodIcon} style={{display: "inline-block"}} />
