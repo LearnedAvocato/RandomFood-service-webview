@@ -67,6 +67,8 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
       var foodTitleWithDuplicates = document.getElementsByName("title" + indicesToSet[i].toString());
       var foodDescriptionWithDuplicates = document.getElementsByName("description" + indicesToSet[i].toString());
       var foodUrlWithDuplicates = document.getElementsByName("url" + indicesToSet[i].toString());
+      var foodPriceWithDuplicates = document.getElementsByName("price" + indicesToSet[i].toString());
+      var foodRestarauntNameWithDuplicates = document.getElementsByName("restarauntName" + indicesToSet[i].toString());
       for (var j = 0; j < foodImageWithDuplicates.length; j++) {
         var foodImg = foodImageWithDuplicates[j];
         if (foodImg != null) {            
@@ -90,6 +92,14 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
         var foodUrl = foodUrlWithDuplicates[j];
         if (foodUrl != null) {
           foodUrl.href = card["restarauntUrl"];
+        }
+        var foodPrice = foodPriceWithDuplicates[j];
+        if (foodPrice != null) {
+          foodPrice.innerText = card["price"] + " \u20bd";
+        }
+        var foodRestarauntName = foodRestarauntNameWithDuplicates[j];
+        if (foodRestarauntName != null) {
+          foodRestarauntName.innerText = card["restarauntName"];
         }
       }
     }
@@ -131,13 +141,15 @@ export default function App() {
       <Card.Body>
         <Card.Title name={"title"+num.toString()}></Card.Title>
         <Card.Text name={"description"+num.toString()} > 
-        </Card.Text> 
+        </Card.Text>
+         <Card.Subtitle name={"price"+num.toString()}> </Card.Subtitle>
         <a name={"url"+num.toString()} href="" target="_blank">
           <Button variant="primary">
             <div style={{display: "inline-block", color: "#000000"}}>В ресторан!</div>
           </Button>
         </a>
       </Card.Body>
+      <Card.Footer className="text-muted" name={"restarauntName"+num.toString()}></Card.Footer>
     </Card>
   ));
 
