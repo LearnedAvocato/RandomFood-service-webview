@@ -6,12 +6,11 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import yandexFoodIcon from './res/yandex_food.ico';
 
 const maxCardsNum = 30;
 const leftCardsNumToRequestNew = 15;
 const cardsNumToRequest = 10;
-const cardsNumToPreloadBeforeFirst = 5;
+const cardsNumToPreloadBeforeFirst = 12;
 var lastLoadedCardIdx = -1;
 var processingCardRequest = false;
 
@@ -27,7 +26,7 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
   try {
     // var url = new URL("https://learned-avocato.ru/getRandomFood"),
     var url = new URL("http://127.0.0.1:3001/getRandomFood"),
-    params = {latitude:55.696233, longitude:37.570431, cardsNum:cardsNum, getTags:true}
+    params = {latitude:55.696233, longitude:37.570431, cardsNum:cardsNum}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
     const response = await fetch(url, {
       method: 'GET',
@@ -86,7 +85,7 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
           foodTitle.innerText = card["name"];
         }
         var foodDescription = foodDescriptionWithDuplicates[j];
-        if (foodDescription != null) {
+        if (foodDescription != null && card["description"] != null) {
           foodDescription.innerText = card["description"];
         }
         var foodUrl = foodUrlWithDuplicates[j];
@@ -94,7 +93,7 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
           foodUrl.href = card["restarauntUrl"];
         }
         var foodPrice = foodPriceWithDuplicates[j];
-        if (foodPrice != null) {
+        if (foodPrice != null && card["price"] != null) {
           foodPrice.innerText = card["price"] + " \u20bd";
         }
         var foodRestarauntName = foodRestarauntNameWithDuplicates[j];
