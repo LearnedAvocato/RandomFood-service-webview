@@ -68,3 +68,15 @@
   margin-top: 5%;
 }
 
+.card-subtitle {
+  text-align: center;
+  color: #575C07;
+  font-family: 'Nunito';
+  margin-bottom: 5%;
+  font-weight: bold;
+}
+
+.card-footer:last-child {
+  text-align: center;
+  font-family: 'Nunito';
+}
