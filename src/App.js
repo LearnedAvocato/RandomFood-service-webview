@@ -110,6 +110,7 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
 
 export default function App() {
   const settings = {
+    arrows: true,
     infinite: true,
     speed: 500,
     slidesToScroll: 1,
@@ -130,7 +131,27 @@ export default function App() {
         RequestCards(cardsNumToRequest);
         processingCardRequest = true;
       }
-    }
+    },
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3
+        }
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1
+        }
+      }
+    ]
   }
 
   const renderSlides = () =>
