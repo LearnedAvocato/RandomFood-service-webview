@@ -14,6 +14,9 @@ const cardsNumToPreloadBeforeFirst = 12;
 var lastLoadedCardIdx = -1;
 var processingCardRequest = false;
 
+var userLatitude = 55.696233;
+var userLongitude = 37.570431;
+
 function CardIndicesToSet(last, num) {
   if (last + num > maxCardsNum) {
       return Array.from({length:maxCardsNum-last-1},(v,k)=>k+last+1).concat(Array.from({length:num+last-maxCardsNum+1},(v,k)=>k));
@@ -26,7 +29,7 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
   try {
     // var url = new URL("https://learned-avocato.ru/getRandomFood"),
     var url = new URL("http://127.0.0.1:3001/getRandomFood"),
-    params = {latitude:55.696233, longitude:37.570431, cardsNum:cardsNum}
+    params = {latitude:userLatitude, longitude:userLongitude, cardsNum:cardsNum}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
     const response = await fetch(url, {
       method: 'GET',
@@ -108,6 +111,24 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
   processingCardRequest = false;
 }
 
+function setLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(onSetLocationSuccess, onSetLocationFailure);
+  } else {
+    console.log('Unable to set location');
+  }
+}
+
+function onSetLocationSuccess(position) {
+  userLatitude = position.coords.latitude;
+  userLongitude = position.coords.longitude;
+  console.log('Set location successfully');
+}
+
+function onSetLocationFailure(error) {
+  console.log('Failed to set location with error ', error);
+}
+
 export default function App() {
   const settings = {
     arrows: true,
@@ -121,7 +142,7 @@ export default function App() {
     centerPadding: "60px",
     slidesToShow: 5,
     adaptiveHeight: true,
-    onInit: () => RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst),
+    onInit: () => { setLocation(); RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst) },
     afterChange: index => {
       var indexWithOffset = lastLoadedCardIdx - index;
       if (indexWithOffset < 0) {
