@@ -140,7 +140,7 @@ export default function App() {
     centerMode: true,
     className: "center",
     centerPadding: "60px",
-    slidesToShow: 5,
+    slidesToShow: 3,
     adaptiveHeight: true,
     onInit: () => { setLocation(); RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst) },
     afterChange: index => {
