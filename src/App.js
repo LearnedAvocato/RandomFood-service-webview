@@ -1,5 +1,4 @@
-import React, { Component }  from 'react';
-
+import React, { useState, useEffect } from 'react';
 import "./styles.css";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -8,172 +7,230 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useRef } from 'react';
 
 const maxCardsNum = 30;
 const leftCardsNumToRequestNew = 15;
-const cardsNumToRequest = 10;
-const cardsNumToPreloadBeforeFirst = 12;
-var lastLoadedCardIdx = -1;
-var processingCardRequest = false;
+const cardsNumToRequest = 15;
+const cardsNumToPreloadBeforeFirst = 6;
 
-var userLatitude = 55.696233;
-var userLongitude = 37.570431;
+const useSyncState = (initialValue) => {
+  const stateRef = useRef(initialValue);
 
-var requestAllCardsOnSetLocation = false
+  const getState = () => stateRef.current;
 
-function CardIndicesToSet(last, num) {
-  if (last + num > maxCardsNum) {
-      return Array.from({length:maxCardsNum-last-1},(v,k)=>k+last+1).concat(Array.from({length:num+last-maxCardsNum+1},(v,k)=>k));
-  } else {
-      return Array.from({length:num},(v,k)=>k+last+1);
-  }
-}
+  const setState = (newValue) => {
+    stateRef.current = newValue;
+  };
 
-async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
-  try {
-    var url = new URL("https://learned-avocato.ru/getRandomFood"),
-    //var url = new URL("http://127.0.0.1:3001/getRandomFood"),
-    params = {latitude:userLatitude, longitude:userLongitude, cardsNum:cardsNum}
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    });
+  return [getState, setState];
+};
 
-    if (!response.ok) {
-      throw new Error(`Error! status: ${response.status}`);
-    }
+const App = () => {
+  const [getUserLatitude, setUserLatitude] = useSyncState(55.696233);
+  const [getUserLongitude, setUserLongitude] = useSyncState(37.570431);
+  const [getLastLoadedCardIdx, setLastLoadedCardIdx] = useSyncState(-1);
+  const [getProcessingCardRequest, setProcessingCardRequest] = useSyncState(false);
+  const [getRequestAllCardsOnSetLocation, setRequestAllCardsOnSetLocation] = useSyncState(false);
 
-    const result = await response.json();
+  useEffect(() => {
+    setLocation();
+  }, []);
 
-    //console.log('result is: ', JSON.stringify(result, null, 4));
-
-    var foodCards = result["foodCards"];
-    if (foodCards == null) {
-      toast.warn('Нет ресторанов поблизости');
-      console.log('Food data is not available');
-      processingCardRequest = false;
-      return;
-    }
-
-    var indicesToSet;
-    if (lastLoadedCardIdx < 0) {
-      indicesToSet = CardIndicesToSet(maxCardsNum+1, foodCards.length);
-      lastLoadedCardIdx = 0;
+  const cardIndicesToSet = (last, num) => {
+    if (last + num > maxCardsNum) {
+      return Array.from({ length: maxCardsNum - last - 1 }, (v, k) => k + last + 1).concat(Array.from({ length: num + last - maxCardsNum + 1 }, (v, k) => k));
     } else {
-      indicesToSet = CardIndicesToSet(lastLoadedCardIdx, foodCards.length);
+      return Array.from({ length: num }, (v, k) => k + last + 1);
     }
-    lastLoadedCardIdx = (lastLoadedCardIdx + foodCards.length - 1) % maxCardsNum;
+  };
 
-    // update to preload before first
-    for (var i = 0; i < indicesToSet.length; i++){
-        indicesToSet[i] = (indicesToSet[i] - defaultIndicesOffset + maxCardsNum) % maxCardsNum;
-    }
-    lastLoadedCardIdx = (lastLoadedCardIdx - defaultIndicesOffset + maxCardsNum) % maxCardsNum;
-    
-    for (var i = 0; i < foodCards.length; i++){
-      var card = foodCards[i];
-      var foodImageWithDuplicates = document.getElementsByName("image" + indicesToSet[i].toString());
-      var foodTitleWithDuplicates = document.getElementsByName("title" + indicesToSet[i].toString());
-      var foodDescriptionWithDuplicates = document.getElementsByName("description" + indicesToSet[i].toString());
-      var foodUrlWithDuplicates = document.getElementsByName("url" + indicesToSet[i].toString());
-      var foodPriceWithDuplicates = document.getElementsByName("price" + indicesToSet[i].toString());
-      var foodRestarauntNameWithDuplicates = document.getElementsByName("restarauntName" + indicesToSet[i].toString());
-      for (var j = 0; j < foodImageWithDuplicates.length; j++) {
-        var foodImg = foodImageWithDuplicates[j];
-        if (foodImg != null) {            
-          var imageUrl = card["imageUrl"];
-          if (!imageUrl.includes("{w}")) {
-            continue;
-          } else {
-            imageUrl = imageUrl.replace("{w}", "200");
-            imageUrl = imageUrl.replace("{h}", "200");
-            foodImg.src = imageUrl;  
-          }
-        }
-        var foodTitle = foodTitleWithDuplicates[j];
-        if (foodTitle != null) {
-          foodTitle.innerText = card["name"];
-        }
-        var foodDescription = foodDescriptionWithDuplicates[j];
-        if (foodDescription != null && card["description"] != null) {
-          foodDescription.innerText = card["description"];
-        }
-        var foodUrl = foodUrlWithDuplicates[j];
-        if (foodUrl != null) {
-          foodUrl.href = card["restarauntUrl"];
-        }
-        var foodPrice = foodPriceWithDuplicates[j];
-        if (foodPrice != null && card["price"] != null) {
-          foodPrice.innerText = card["price"] + " \u20bd";
-        }
-        var foodRestarauntName = foodRestarauntNameWithDuplicates[j];
-        if (foodRestarauntName != null) {
-          foodRestarauntName.innerText = card["restarauntName"];
-        }
+  const requestCards = async (cardsNum, defaultIndicesOffset = 0) => {
+    try {
+      const url = new URL("https://learned-avocato.ru/getRandomFood");
+      const params = { latitude: getUserLatitude(), longitude: getUserLongitude(), cardsNum: cardsNum };
+      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error! status: ${response.status}`);
       }
-    }
-  } catch (err) {
-    processingCardRequest = false;
-    console.log('err: ', err)
-  }
-  processingCardRequest = false;
-}
 
-function setLocation() {
-  if (navigator.geolocation) {
-    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-      if (result.state == 'prompt') {
-        console.log('Geolocation permission prompted');
-        RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
-        requestAllCardsOnSetLocation = false
+      const result = await response.json();
+      const foodCards = result["foodCards"];
+
+      if (foodCards == null) {
+        toast.warn('Нет ресторанов поблизости');
+        console.log('Food data is not available');
+        setProcessingCardRequest(false);
+        return;
       } else {
-        requestAllCardsOnSetLocation = true
-        if (result.state != "granted") {
-          toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
-          RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+        processFoodResponse(foodCards, defaultIndicesOffset);
+      }
+    } catch (err) {
+      setProcessingCardRequest(false);
+      console.log('err:', err);
+    }
+  };
+
+  const processFoodResponse = (foodCards, defaultIndicesOffset) => {
+    const indicesToSet = getLastLoadedCardIdx() < 0
+      ? cardIndicesToSet(maxCardsNum + 1, foodCards.length)
+      : cardIndicesToSet(getLastLoadedCardIdx(), foodCards.length);
+
+    setLastLoadedCardIdx((getLastLoadedCardIdx() + foodCards.length - 1) % maxCardsNum);
+
+    const updatedIndicesToSet = indicesToSet.map(index => (index - defaultIndicesOffset + maxCardsNum) % maxCardsNum);
+    setLastLoadedCardIdx((getLastLoadedCardIdx() - defaultIndicesOffset + maxCardsNum) % maxCardsNum);
+
+    for (let i = 0; i < foodCards.length; i++) {
+      const indexToSet = updatedIndicesToSet[i];
+      setFoodCard(indexToSet, foodCards[i]);
+    }
+
+    setProcessingCardRequest(false);
+  };
+
+  function setLocation() {
+    if (navigator.geolocation) {
+      navigator.permissions
+        .query({ name: "geolocation" })
+        .then((result) => {
+          if (result.state === "prompt") {
+            console.log("Geolocation permission prompted");
+            requestCards(maxCardsNum, cardsNumToPreloadBeforeFirst);
+            setRequestAllCardsOnSetLocation(false);
+          } else {
+            setRequestAllCardsOnSetLocation(true);
+            if (result.state !== "granted") {
+              toast.warn(
+                "Предоставьте доступ к местоположению для получения актуальных данных"
+              );
+              requestCards(maxCardsNum, cardsNumToPreloadBeforeFirst);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking geolocation permission:", error);
+          toast.warn(
+            "Предоставьте доступ к местоположению для получения актуальных данных"
+          );
+          requestCards(maxCardsNum, cardsNumToPreloadBeforeFirst);
+        });
+  
+      navigator.geolocation.getCurrentPosition(
+        onSetLocationSuccess,
+        onSetLocationFailure
+      );
+    } else {
+      requestCards(maxCardsNum, cardsNumToPreloadBeforeFirst);
+      console.log("Unable to set location");
+      toast.warn(
+        "Предоставьте доступ к местоположению для получения актуальных данных"
+      );
+    }
+  }  
+
+  const onSetLocationSuccess = (position) => {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    setUserLatitude(latitude);
+    setUserLongitude(longitude);
+  
+    setProcessingCardRequest(true);
+    if (getRequestAllCardsOnSetLocation()) {
+      requestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+    } else {
+      setLastLoadedCardIdx(-1)
+      requestCards(cardsNumToRequest, 5)
+      toast.success('Местоположение и блюда обновлены');
+    }
+  
+    console.log('Set location successfully');
+  }
+
+  const onSetLocationFailure = () => {
+    toast.error('Не удалось получить геопозицию');
+    console.log('Error getting user location');
+  };
+
+  const setFoodCard = (index, foodCardData) => {
+    const foodImageWithDuplicates = document.getElementsByName(`image${index}`);
+    const foodTitleWithDuplicates = document.getElementsByName(`title${index}`);
+    const foodDescriptionWithDuplicates = document.getElementsByName(`description${index}`);
+    const foodUrlWithDuplicates = document.getElementsByName(`url${index}`);
+    const foodPriceWithDuplicates = document.getElementsByName(`price${index}`);
+    const foodRestarauntNameWithDuplicates = document.getElementsByName(`restarauntName${index}`);
+  
+    for (let j = 0; j < foodImageWithDuplicates.length; j++) {
+      const foodImg = foodImageWithDuplicates[j];
+      if (foodImg) {
+        let imageUrl = foodCardData.imageUrl;
+        if (imageUrl.includes("{w}")) {
+          imageUrl = imageUrl.replace("{w}", "200").replace("{h}", "200");
+          foodImg.src = imageUrl;
         }
       }
-    }).catch((error) => {
-      console.error('Error checking geolocation permission:', error);
-      toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
-      RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
-    });
+  
+      const foodTitle = foodTitleWithDuplicates[j];
+      if (foodTitle) {
+        foodTitle.innerText = foodCardData.name;
+      }
+  
+      const foodDescription = foodDescriptionWithDuplicates[j];
+      if (foodDescription && foodCardData.description) {
+        foodDescription.innerText = foodCardData.description;
+      }
+  
+      const foodUrl = foodUrlWithDuplicates[j];
+      if (foodUrl) {
+        foodUrl.href = foodCardData.restarauntUrl;
+      }
+  
+      const foodPrice = foodPriceWithDuplicates[j];
+      if (foodPrice && foodCardData.price) {
+        foodPrice.innerText = `${foodCardData.price} \u20bd`;
+      }
+  
+      const foodRestarauntName = foodRestarauntNameWithDuplicates[j];
+      if (foodRestarauntName) {
+        foodRestarauntName.innerText = foodCardData.restarauntName;
+      }
+    }
+  };
 
-    navigator.geolocation.getCurrentPosition(onSetLocationSuccess, onSetLocationFailure);
-  } else {
-    RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
-    console.log('Unable to set location');
-    toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
-  }
-}
+  const renderSlides = () =>
+    [...Array(maxCardsNum).keys()].map(num => (
+      <Card style={{ width: '400px', height: '400px' }}>
+        <Card.Img name={"image" + num.toString()} variant="top" src="" />
+        <Card.Body>
+          <Card.Title name={"title" + num.toString()}></Card.Title>
+          <Card.Text name={"description" + num.toString()}></Card.Text>
+          <Card.Subtitle name={"price" + num.toString()}></Card.Subtitle>
+          <a name={"url" + num.toString()} href="" target="_blank">
+            <Button variant="primary">
+              <div
+                style={{ display: 'inline-block', color: '#000000' }}
+              >
+                В ресторан!
+              </div>
+            </Button>
+          </a>
+        </Card.Body>
+        <Card.Footer
+          className="text-muted"
+          name={"restarauntName" + num.toString()}
+        ></Card.Footer>
+      </Card>
+    ));
 
-function onSetLocationSuccess(position) {
-  userLatitude = position.coords.latitude;
-  userLongitude = position.coords.longitude;
-
-  processingCardRequest = true;
-  if (requestAllCardsOnSetLocation) {
-    RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
-  } else {
-    lastLoadedCardIdx = -1
-    RequestCards(cardsNumToRequest, 5)
-    toast.success('Местоположение и блюда обновлены');
-  }
-
-  console.log('Set location successfully');
-}
-
-function onSetLocationFailure(error) {
-  RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
-  toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
-  console.log('Failed to set location with error ', error);
-}
-
-export default function App() {
   const settings = {
     arrows: true,
     infinite: true,
@@ -182,19 +239,18 @@ export default function App() {
     variableWidth: true,
     adaptiveHeight: true,
     centerMode: true,
-    className: "center",
-    centerPadding: "60px",
+    className: 'center',
+    centerPadding: '60px',
     slidesToShow: 5,
     adaptiveHeight: true,
-    onInit: () => { setLocation();},
     afterChange: index => {
-      var indexWithOffset = lastLoadedCardIdx - index;
+      let indexWithOffset = getLastLoadedCardIdx() - index;
       if (indexWithOffset < 0) {
-        indexWithOffset = indexWithOffset + maxCardsNum;
+        indexWithOffset += maxCardsNum;
       }
-      if (!processingCardRequest && indexWithOffset <= leftCardsNumToRequestNew) {
-        RequestCards(cardsNumToRequest);
-        processingCardRequest = true;
+      if (!getProcessingCardRequest() && indexWithOffset <= leftCardsNumToRequestNew) {
+        requestCards(cardsNumToRequest);
+        setProcessingCardRequest(true);
       }
     },
     responsive: [
@@ -202,49 +258,32 @@ export default function App() {
         breakpoint: 1024,
         settings: {
           slidesToShow: 3,
-          arrows: false
-        }
+          arrows: false,
+        },
       },
       {
         breakpoint: 600,
         settings: {
           slidesToShow: 2,
-          arrows: false
-        }
+          arrows: false,
+        },
       },
       {
         breakpoint: 480,
         settings: {
           slidesToShow: 1,
-          arrows: false
-        }
-      }
-    ]
-  }
-
-  const renderSlides = () =>
-  [...Array(maxCardsNum).keys()].map(num => (
-    <Card style={{ width: '400px', height: '400px' }}>
-      <Card.Img name={"image"+num.toString()} variant="top" src="" />
-      <Card.Body>
-        <Card.Title name={"title"+num.toString()}></Card.Title>
-        <Card.Text name={"description"+num.toString()} > 
-        </Card.Text>
-         <Card.Subtitle name={"price"+num.toString()}> </Card.Subtitle>
-        <a name={"url"+num.toString()} href="" target="_blank">
-          <Button variant="primary">
-            <div style={{display: "inline-block", color: "#000000"}}>В ресторан!</div>
-          </Button>
-        </a>
-      </Card.Body>
-      <Card.Footer className="text-muted" name={"restarauntName"+num.toString()}></Card.Footer>
-    </Card>
-  ));
+          arrows: false,
+        },
+      },
+    ],
+  };
 
   return (
     <div id="foodCarousel">
-    <Slider {...settings}>{renderSlides()}</Slider>
-    <ToastContainer />
-  </div>
+      <Slider {...settings}>{renderSlides()}</Slider>
+      <ToastContainer />
+    </div>
   );
-}
+};
+
+export default App;
