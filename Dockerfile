@@ -8,8 +8,9 @@ WORKDIR /app
 
 ENV PATH /app/node_modules/.bin:$PATH
 ENV NODE_OPTIONS --openssl-legacy-provider
-COPY package.json /app/package.json
-RUN npm install --loglevel verbose
+COPY package*.json /app/
+RUN npm ci
+#RUN npm install --loglevel verbose
 #RUN npm install react-scripts@5.0.1 -g --silent
 
 RUN npm run build
