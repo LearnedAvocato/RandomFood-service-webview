@@ -6,6 +6,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const maxCardsNum = 30;
 const leftCardsNumToRequestNew = 15;
@@ -17,6 +19,8 @@ var processingCardRequest = false;
 var userLatitude = 55.696233;
 var userLongitude = 37.570431;
 
+var requestAllCardsOnSetLocation = false
+
 function CardIndicesToSet(last, num) {
   if (last + num > maxCardsNum) {
       return Array.from({length:maxCardsNum-last-1},(v,k)=>k+last+1).concat(Array.from({length:num+last-maxCardsNum+1},(v,k)=>k));
@@ -27,8 +31,8 @@ function CardIndicesToSet(last, num) {
 
 async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
   try {
-    // var url = new URL("https://learned-avocato.ru/getRandomFood"),
-    var url = new URL("http://127.0.0.1:3001/getRandomFood"),
+    var url = new URL("https://learned-avocato.ru/getRandomFood"),
+    //var url = new URL("http://127.0.0.1:3001/getRandomFood"),
     params = {latitude:userLatitude, longitude:userLongitude, cardsNum:cardsNum}
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
     const response = await fetch(url, {
@@ -48,6 +52,13 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
     //console.log('result is: ', JSON.stringify(result, null, 4));
 
     var foodCards = result["foodCards"];
+    if (foodCards == null) {
+      toast.warn('Нет ресторанов поблизости');
+      console.log('Food data is not available');
+      processingCardRequest = false;
+      return;
+    }
+
     var indicesToSet;
     if (lastLoadedCardIdx < 0) {
       indicesToSet = CardIndicesToSet(maxCardsNum+1, foodCards.length);
@@ -106,6 +117,7 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
       }
     }
   } catch (err) {
+    processingCardRequest = false;
     console.log('err: ', err)
   }
   processingCardRequest = false;
@@ -113,19 +125,51 @@ async function RequestCards(cardsNum, defaultIndicesOffset = 0) {
 
 function setLocation() {
   if (navigator.geolocation) {
+    navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+      if (result.state == 'prompt') {
+        console.log('Geolocation permission prompted');
+        RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+        requestAllCardsOnSetLocation = false
+      } else {
+        requestAllCardsOnSetLocation = true
+        if (result.state != "granted") {
+          toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
+          RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+        }
+      }
+    }).catch((error) => {
+      console.error('Error checking geolocation permission:', error);
+      toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
+      RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+    });
+
     navigator.geolocation.getCurrentPosition(onSetLocationSuccess, onSetLocationFailure);
   } else {
+    RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
     console.log('Unable to set location');
+    toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
   }
 }
 
 function onSetLocationSuccess(position) {
   userLatitude = position.coords.latitude;
   userLongitude = position.coords.longitude;
+
+  processingCardRequest = true;
+  if (requestAllCardsOnSetLocation) {
+    RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+  } else {
+    lastLoadedCardIdx = -1
+    RequestCards(cardsNumToRequest, 5)
+    toast.success('Местоположение и блюда обновлены');
+  }
+
   console.log('Set location successfully');
 }
 
 function onSetLocationFailure(error) {
+  RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst)
+  toast.warn('Предоставьте доступ к местоположению для получения актуальных данных');
   console.log('Failed to set location with error ', error);
 }
 
@@ -142,7 +186,7 @@ export default function App() {
     centerPadding: "60px",
     slidesToShow: 5,
     adaptiveHeight: true,
-    onInit: () => { setLocation(); RequestCards(maxCardsNum, cardsNumToPreloadBeforeFirst) },
+    onInit: () => { setLocation();},
     afterChange: index => {
       var indexWithOffset = lastLoadedCardIdx - index;
       if (indexWithOffset < 0) {
@@ -200,6 +244,7 @@ export default function App() {
   return (
     <div id="foodCarousel">
     <Slider {...settings}>{renderSlides()}</Slider>
+    <ToastContainer />
   </div>
   );
 }
