@@ -1,22 +1,24 @@
 # build environment
-FROM node:18-alpine as builder
+FROM node:lts-alpine as builder
+
 RUN mkdir /app
-
-COPY . /app
-
 WORKDIR /app
 
 ENV PATH /app/node_modules/.bin:$PATH
 ENV NODE_OPTIONS --openssl-legacy-provider
-COPY package*.json /app/
-RUN npm ci
-#RUN npm install --loglevel verbose
-#RUN npm install react-scripts@5.0.1 -g --silent
 
+COPY package*.json /app/
+RUN npm config set cache /root/.npm
+RUN npm ci
+
+COPY . /app
 RUN npm run build
 
 # production environment
 FROM nginx:stable-alpine
+
 COPY --from=builder /app/build /usr/share/nginx/html
+
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
